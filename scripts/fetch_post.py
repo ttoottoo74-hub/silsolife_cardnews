@@ -2,7 +2,10 @@
 """
 실소 카드뉴스 수집기 (파이프라인 1~2단계)
 
-WordPress REST API에서 최신 글을 읽어 카드 JSON을 만들어 냅니다.
+silsolife.kr 앞에는 자바스크립트 퍼즐을 내는 방화벽이 있습니다.
+평범한 프로그램 요청은 HTML 안내 페이지를 받고 막히므로,
+카드 렌더링용으로 이미 설치해 둔 크롬으로 읽습니다. 브라우저는 퍼즐을 스스로 풉니다.
+
 - 커스텀 필드(silso_cardnews)에 GPT가 넣어준 JSON이 있으면 그것을 씁니다.
 - 없으면 처리를 건너뜁니다(빈 카드를 지어내지 않습니다).
 - link/date/category는 GPT 값을 믿지 않고 실제 발행본으로 덮어씁니다.
@@ -20,22 +23,14 @@ WordPress REST API에서 최신 글을 읽어 카드 JSON을 만들어 냅니다
 import argparse
 import json
 import sys
-import urllib.error
 import urllib.parse
-import urllib.request
 
 BASE = "https://silsolife.kr/wp-json/wp/v2"
 
-# 일부 호스팅은 프로그램처럼 보이는 요청을 차단하고 HTML 안내 페이지를 돌려줍니다.
-# 브라우저와 같은 헤더를 보내 그 차단을 피합니다.
-HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
-    ),
-    "Accept": "application/json, text/plain, */*",
-    "Accept-Language": "ko-KR,ko;q=0.9",
-}
+UA = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+)
 
 CATEGORY_BY_ID = {
     3: "돈·절약",
@@ -51,38 +46,57 @@ def die(msg, code=1):
     sys.exit(code)
 
 
-def get(path, **params):
-    """WordPress REST API 호출. 실패하면 무엇이 돌아왔는지 보여주고 끝냅니다."""
+def fetch_json(path, **params):
+    """크롬으로 REST API를 읽는다. 방화벽 퍼즐은 브라우저가 알아서 푼다."""
     url = f"{BASE}/{path}?" + urllib.parse.urlencode(params)
-    req = urllib.request.Request(url, headers=HEADERS)
 
     try:
-        with urllib.request.urlopen(req, timeout=30) as r:
-            raw = r.read().decode("utf-8", "replace")
-            ctype = r.headers.get("Content-Type", "")
-    except urllib.error.HTTPError as e:
-        body = e.read().decode("utf-8", "replace")[:300]
-        die(f"[블로그 응답 오류 {e.code}] {url}\n{body}")
-    except urllib.error.URLError as e:
-        die(f"[블로그에 접속할 수 없습니다] {url}\n{e.reason}")
-
-    if not raw.strip():
-        die(f"[빈 응답] {url}\n블로그가 아무 내용도 돌려주지 않았습니다.")
-
-    try:
-        return json.loads(raw)
-    except json.JSONDecodeError:
-        preview = raw.strip()[:400].replace("\n", " ")
+        from playwright.sync_api import sync_playwright
+    except ImportError:
         die(
-            f"[JSON이 아닌 응답] {url}\n"
-            f"Content-Type: {ctype}\n"
-            f"돌아온 내용 앞부분: {preview}\n\n"
-            "REST API가 아니라 HTML이 왔습니다. 대개 다음 중 하나입니다.\n"
-            "  · 보안 플러그인이나 방화벽이 프로그램 접근을 막고 있다\n"
-            "  · REST API가 비활성화돼 있다\n"
-            "  · 점검 모드이거나 로그인 페이지로 넘어간다\n"
-            "브라우저에서 같은 주소를 열어 JSON이 보이는지 확인해 보세요."
+            "playwright가 설치돼 있지 않습니다.\n"
+            "  pip install playwright && playwright install chromium"
         )
+
+    last_preview = ""
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        ctx = browser.new_context(user_agent=UA, locale="ko-KR")
+        page = ctx.new_page()
+
+        # 퍼즐을 푸는 데 한 번의 새로고침이 필요할 수 있어 몇 번 더 시도한다
+        for attempt in range(1, 6):
+            try:
+                page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            except Exception as e:
+                if attempt == 5:
+                    browser.close()
+                    die(f"[블로그에 접속할 수 없습니다] {url}\n{e}")
+                page.wait_for_timeout(2000)
+                continue
+
+            page.wait_for_timeout(1500)
+            text = (page.evaluate("document.body ? document.body.innerText : ''") or "").strip()
+            last_preview = text[:400].replace("\n", " ")
+
+            if text.startswith("[") or text.startswith("{"):
+                browser.close()
+                try:
+                    return json.loads(text)
+                except json.JSONDecodeError as e:
+                    die(f"[JSON 해석 실패] {url}\n{e}\n앞부분: {last_preview}")
+
+            print(f"  방화벽 통과 시도 {attempt}/5…", file=sys.stderr)
+
+        browser.close()
+
+    die(
+        f"[방화벽을 통과하지 못했습니다] {url}\n"
+        f"마지막 응답 앞부분: {last_preview}\n\n"
+        "브라우저로도 JSON을 받지 못했습니다. 다음을 확인해 보세요.\n"
+        "  · 호스팅의 보안·DDoS 차단 설정에서 /wp-json/ 경로를 예외로 둘 수 있는지\n"
+        "  · 워드프레스 보안 플러그인이 REST API를 막고 있지 않은지"
+    )
 
 
 def main():
@@ -93,9 +107,9 @@ def main():
 
     fields = "id,slug,date,link,categories,meta,title"
     if args.slug:
-        posts = get("posts", slug=args.slug, _fields=fields)
+        posts = fetch_json("posts", slug=args.slug, _fields=fields)
     else:
-        posts = get("posts", per_page=1, _fields=fields)
+        posts = fetch_json("posts", per_page=1, _fields=fields)
 
     if not isinstance(posts, list) or not posts:
         die("발행된 글을 찾지 못했습니다.")
