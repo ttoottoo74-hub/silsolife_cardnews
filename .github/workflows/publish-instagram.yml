@@ -1,0 +1,42 @@
+name: 인스타그램 발행
+
+# 사람이 검수 페이지에서 확인한 뒤에만 수동으로 실행합니다.
+on:
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: "발행할 카드뉴스의 slug"
+        required: true
+      dry_run:
+        description: "모의 실행 (실제 발행하지 않음)"
+        type: boolean
+        default: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # 승인 게이트를 한 겹 더 두고 싶으면 리포지터리 설정에서
+    # 'instagram' 환경에 필수 리뷰어를 지정하세요.
+    environment: instagram
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 카드 확인
+        run: |
+          test -f docs/cards/${{ inputs.slug }}/card.json \
+            || { echo "docs/cards/${{ inputs.slug }} 가 없습니다. 먼저 카드뉴스 생성을 돌리세요."; exit 1; }
+          ls docs/cards/${{ inputs.slug }}/*.png
+
+      - name: 발행
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          CARD_BASE_URL: ${{ vars.CARD_BASE_URL }}
+        run: |
+          python3 scripts/publish_instagram.py \
+            docs/cards/${{ inputs.slug }}/card.json \
+            ${{ inputs.dry_run && '--dry-run' || '' }}
