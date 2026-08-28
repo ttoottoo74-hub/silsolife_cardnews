@@ -1,0 +1,48 @@
+{
+  "_주석": [
+    "실소가 자주 인용하는 기관 레지스트리.",
+    "mark_ok = 로고(CI/정부상징)를 카드에 넣어도 되는가.",
+    "  false  → 정부상징(태극) 사용 기관. 부·처·청은 2016년부터 통합 정부상징을 쓰므로",
+    "           개별 로고가 없고, 무단사용은 부정경쟁방지법 문제로 이어질 수 있다.",
+    "  check  → 자체 CI를 가진 공공기관. 기관별 CI 사용지침을 개별 확인해야 한다.",
+    "abbr = 로고 대신 쓰는 자체 출처 마크의 두 글자. 저작권 문제가 없다."
+  ],
+
+  "institutions": {
+    "law.go.kr":              { "name": "국가법령정보센터", "abbr": "법령", "type": "법령", "mark_ok": false, "note": "법제처 운영" },
+    "fsc.go.kr":              { "name": "금융위원회",       "abbr": "금융", "type": "부처", "mark_ok": false },
+    "fss.or.kr":              { "name": "금융감독원",       "abbr": "금감", "type": "공공기관", "mark_ok": "check" },
+    "nts.go.kr":              { "name": "국세청",           "abbr": "국세", "type": "부처", "mark_ok": false },
+    "kdic.or.kr":             { "name": "예금보험공사",     "abbr": "예보", "type": "공공기관", "mark_ok": "check" },
+
+    "gov.kr":                 { "name": "정부24",           "abbr": "정부", "type": "부처", "mark_ok": false },
+    "mohw.go.kr":             { "name": "보건복지부",       "abbr": "복지", "type": "부처", "mark_ok": false },
+    "basicpension.mohw.go.kr":{ "name": "기초연금",         "abbr": "연금", "type": "부처", "mark_ok": false },
+    "motie.go.kr":            { "name": "산업통상자원부",   "abbr": "산업", "type": "부처", "mark_ok": false },
+    "energy.or.kr":           { "name": "한국에너지공단",   "abbr": "에너", "type": "공공기관", "mark_ok": "check" },
+    "mois.go.kr":             { "name": "행정안전부",       "abbr": "행안", "type": "부처", "mark_ok": false },
+
+    "nhis.or.kr":             { "name": "건강보험공단",     "abbr": "건보", "type": "공공기관", "mark_ok": "check" },
+    "hira.or.kr":             { "name": "심사평가원",       "abbr": "심평", "type": "공공기관", "mark_ok": "check" },
+    "kdca.go.kr":             { "name": "질병관리청",       "abbr": "질병", "type": "부처", "mark_ok": false },
+    "mfds.go.kr":             { "name": "식약처",           "abbr": "식약", "type": "부처", "mark_ok": false },
+
+    "me.go.kr":               { "name": "환경부",           "abbr": "환경", "type": "부처", "mark_ok": false },
+    "keco.or.kr":             { "name": "한국환경공단",     "abbr": "환공", "type": "공공기관", "mark_ok": "check" },
+    "15990903.or.kr":         { "name": "E-순환거버넌스",   "abbr": "순환", "type": "공공기관", "mark_ok": "check" },
+    "molit.go.kr":            { "name": "국토교통부",       "abbr": "국토", "type": "부처", "mark_ok": false },
+    "k-apt.go.kr":            { "name": "K-apt",            "abbr": "관리", "type": "공공기관", "mark_ok": "check" },
+
+    "nps.or.kr":              { "name": "국민연금공단",     "abbr": "국민", "type": "공공기관", "mark_ok": "check" },
+    "comwel.or.kr":           { "name": "근로복지공단",     "abbr": "근복", "type": "공공기관", "mark_ok": "check" },
+    "insure.or.kr":           { "name": "생명보험협회",     "abbr": "생보", "type": "협회", "mark_ok": "check" },
+    "kidi.or.kr":             { "name": "보험개발원",       "abbr": "보개", "type": "공공기관", "mark_ok": "check" }
+  },
+
+  "type_label": {
+    "부처": "정부기관",
+    "공공기관": "공공기관",
+    "법령": "법령 원문",
+    "협회": "협회"
+  }
+}
