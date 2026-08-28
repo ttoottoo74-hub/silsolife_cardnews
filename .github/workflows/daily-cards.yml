@@ -1,1 +1,118 @@
+name: 카드뉴스 생성
 
+# 매일 오전 8시(KST) — 블로그가 아침에 발행된 뒤 도는 시각으로 맞추세요.
+on:
+  schedule:
+    - cron: "0 23 * * *"   # UTC 23:00 = KST 08:00
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: "특정 글의 slug (비우면 최신 글)"
+        required: false
+      use_sample:
+        description: "샘플 데이터로 시험 주행 (블로그를 읽지 않음)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 의존성 설치
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
+          sudo apt-get install -y fonts-noto-cjk
+
+      - name: 1~2단계 · 글 수집
+        id: fetch
+        run: |
+          set +e
+          if [ "${{ inputs.use_sample }}" = "true" ]; then
+            cp samples/demo-card.json card.raw.json
+            echo "::notice::샘플 데이터로 시험 주행합니다. 블로그는 읽지 않습니다."
+            exit 0
+          fi
+          python3 scripts/fetch_post.py \
+            ${{ inputs.slug && format('--slug {0}', inputs.slug) || '' }} \
+            --out card.raw.json
+          code=$?
+          if [ $code -eq 78 ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "::notice::오늘 글에 카드뉴스 JSON이 없어 건너뜁니다."
+            exit 0
+          fi
+          exit $code
+
+      - name: 3단계 · 자동 교정
+        if: steps.fetch.outputs.skip != 'true'
+        run: python3 scripts/normalize_cardnews.py card.raw.json > card.json
+
+      - name: 3단계 · 검증
+        if: steps.fetch.outputs.skip != 'true'
+        run: python3 scripts/validate_cardnews.py card.json
+
+      - name: 4단계 · 카드 렌더
+        if: steps.fetch.outputs.skip != 'true'
+        run: |
+          SLUG=$(python3 -c "import json;print(json.load(open('card.json'))['slug'])")
+          echo "SLUG=$SLUG" >> $GITHUB_ENV
+          mkdir -p docs/cards/$SLUG
+          python3 scripts/render_cards.py card.json docs/cards/$SLUG
+          # 발행 스크립트가 기대하는 01.png ~ NN.png 이름으로 정리
+          cd docs/cards/$SLUG
+          i=1
+          for f in ${SLUG}_*.png; do
+            mv "$f" "$(printf '%02d' $i).png"
+            i=$((i+1))
+          done
+          rm -f _cards.html
+          cd -
+          cp card.json docs/cards/$SLUG/card.json
+
+      - name: 5단계 · 검수 페이지 생성
+        if: steps.fetch.outputs.skip != 'true'
+        run: python3 scripts/build_preview.py docs/cards/$SLUG docs/index.html
+
+      - name: 커밋 (공개 URL 확보)
+        if: steps.fetch.outputs.skip != 'true'
+        run: |
+          git config user.name  "silso-bot"
+          git config user.email "bot@silsolife.kr"
+          git add docs
+          git diff --cached --quiet || git commit -m "카드뉴스: $SLUG"
+          git push
+
+      - name: 토큰 만료 확인
+        if: always()
+        env:
+          EXPIRES: ${{ vars.IG_TOKEN_EXPIRES }}
+        run: |
+          if [ -z "$EXPIRES" ]; then
+            echo "::notice::IG_TOKEN_EXPIRES 변수가 없습니다. 토큰 만료일을 등록해두면 미리 경고합니다."
+            exit 0
+          fi
+          LEFT=$(( ( $(date -d "$EXPIRES" +%s) - $(date +%s) ) / 86400 ))
+          if [ "$LEFT" -lt 0 ]; then
+            echo "::error::인스타그램 토큰이 $EXPIRES 에 만료됐습니다. 갱신하지 않으면 발행이 실패합니다."
+          elif [ "$LEFT" -lt 14 ]; then
+            echo "::warning::인스타그램 토큰 만료까지 ${LEFT}일 남았습니다 ($EXPIRES). scripts/ig_token.py refresh 로 연장하세요."
+          else
+            echo "토큰 만료까지 ${LEFT}일 남았습니다."
+          fi
+
+      - name: 요약
+        if: steps.fetch.outputs.skip != 'true'
+        run: |
+          echo "### 카드뉴스 생성 완료 — \`$SLUG\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "검수 페이지에서 확인한 뒤, **인스타그램 발행** 워크플로를 수동 실행하세요." >> $GITHUB_STEP_SUMMARY
