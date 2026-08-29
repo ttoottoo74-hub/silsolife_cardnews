@@ -14,7 +14,7 @@ JSON의 숫자를 인라인 SVG 도식으로 그립니다. 외부 이미지가 �
 
 from html import escape
 
-W = 908  # 카드 안쪽 폭 (1080 - 좌우 여백 86*2)
+W = 924  # 카드 안쪽 폭 (1080 - 좌우 여백 78*2)
 
 
 def _t(x, y, s, size, weight=700, fill="#1E211F", anchor="start", ls="-0.03em"):
@@ -52,17 +52,17 @@ def timeline(v, c):
         )
         anchor = "start" if i == 0 else ("end" if last else "middle")
         tx = x0 if i == 0 else (x1 if last else x)
-        out.append(_t(tx, y - 46, s.get("note", ""), 29, 700, c["muted"], anchor, "0.04em"))
-        out.append(_t(tx, y + 74, s["label"], 38 if n >= 4 else 46, 800, c["ink"], anchor))
+        out.append(_t(tx, y - 46, s.get("note", ""), 34, 700, c["muted"], anchor, "0.04em"))
+        out.append(_t(tx, y + 82, s["label"], 44 if n >= 4 else 54, 800, c["ink"], anchor))
 
-    return f'<svg viewBox="0 0 {W} 170" width="{W}" height="170">' + "".join(out) + "</svg>"
+    return f'<svg viewBox="0 0 {W} 196" width="{W}" height="196">' + "".join(out) + "</svg>"
 
 
 def compare(v, c):
     """금액·수치 비교 — 가로 막대."""
     items = v["items"][:4]
     top = max(float(i["value"]) for i in items) or 1
-    row_h, bar_h, label_w = 142, 50, 268
+    row_h, bar_h, label_w = 162, 58, 300
     h = row_h * len(items)
     out = []
 
@@ -71,12 +71,12 @@ def compare(v, c):
         w = (W - label_w - 30) * (float(it["value"]) / top)
         fill = c["accent"] if i == 0 else c["accent_soft"]
         ink = c["ink"] if i == 0 else c["muted"]
-        out.append(_t(0, y + 34, it["label"], 38, 700, c["ink"]))
+        out.append(_t(0, y + 40, it["label"], 46, 700, c["ink"]))
         out.append(
             f'<rect x="{label_w}" y="{y}" width="{max(w, 8):.1f}" height="{bar_h}" '
             f'rx="6" fill="{fill}"/>'
         )
-        out.append(_t(label_w, y + bar_h + 50, it["display"], 50, 900, ink))
+        out.append(_t(label_w, y + bar_h + 58, it["display"], 60, 900, ink))
 
     return f'<svg viewBox="0 0 {W} {h}" width="{W}" height="{h}">' + "".join(out) + "</svg>"
 
@@ -84,21 +84,21 @@ def compare(v, c):
 def steps(v, c):
     """절차 — 번호가 붙은 단계."""
     items = v["items"][:4]
-    row_h = 128
+    row_h = 148
     h = row_h * len(items)
     out = []
 
     for i, s in enumerate(items):
         y = i * row_h
-        cy = y + 44
+        cy = y + 50
         if i < len(items) - 1:
             out.append(
-                f'<line x1="38" y1="{cy + 34}" x2="38" y2="{cy + row_h - 34}" '
+                f'<line x1="38" y1="{cy + 40}" x2="38" y2="{cy + row_h - 40}" '
                 f'stroke="{c["line"]}" stroke-width="4"/>'
             )
-        out.append(f'<circle cx="38" cy="{cy}" r="32" fill="{c["accent"]}"/>')
-        out.append(_t(38, cy + 14, i + 1, 40, 900, "#FFFFFF", "middle", "0"))
-        out.append(_t(102, cy + 14, s, 45, 700, c["ink"]))
+        out.append(f'<circle cx="38" cy="{cy}" r="37" fill="{c["accent"]}"/>')
+        out.append(_t(38, cy + 14, i + 1, 46, 900, "#FFFFFF", "middle", "0"))
+        out.append(_t(112, cy + 16, s, 54, 700, c["ink"]))
 
     return f'<svg viewBox="0 0 {W} {h}" width="{W}" height="{h}">' + "".join(out) + "</svg>"
 
@@ -113,11 +113,11 @@ def rng(v, c):
         f'<rect x="{cut:.1f}" y="{y}" width="{x1 - cut:.1f}" height="52" rx="8" fill="{c["accent_soft"]}"/>',
         f'<line x1="{cut:.1f}" y1="{y - 26}" x2="{cut:.1f}" y2="{y + 78}" '
         f'stroke="{c["ink"]}" stroke-width="4"/>',
-        _t(x0, y - 36, v["low_label"], 34, 700, c["accent"]),
-        _t(x1, y - 36, v["high_label"], 34, 700, c["muted"], "end"),
-        _t(cut, y + 118, v["cut_label"], 46, 900, c["ink"], "middle"),
+        _t(x0, y - 36, v["low_label"], 40, 700, c["accent"]),
+        _t(x1, y - 36, v["high_label"], 40, 700, c["muted"], "end"),
+        _t(cut, y + 130, v["cut_label"], 56, 900, c["ink"], "middle"),
     ]
-    return f'<svg viewBox="0 0 {W} 200" width="{W}" height="200">' + "".join(out) + "</svg>"
+    return f'<svg viewBox="0 0 {W} 224" width="{W}" height="224">' + "".join(out) + "</svg>"
 
 
 BUILDERS = {"timeline": timeline, "compare": compare, "steps": steps, "range": rng}
