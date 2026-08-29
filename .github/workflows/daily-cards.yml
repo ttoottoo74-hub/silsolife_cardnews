@@ -62,15 +62,26 @@ jobs:
             echo "::notice::붙여넣은 카드 JSON으로 만듭니다 ($SLUG)."
             exit 0
           fi
-          # ① GPT가 직접 보낸 카드 JSON — 블로그를 읽지 않습니다
+          # ① 앱이 직접 보낸 카드 JSON — 블로그를 읽지 않습니다
+          #
+          # GitHub는 client_payload의 최상위 항목을 10개까지만 받습니다.
+          # 카드 JSON은 항목이 16개라 그대로 넣으면 거부되므로 card 한 겹으로 감싸서 받습니다.
+          # 예전 방식(감싸지 않고 보낸 것)도 그대로 받아 줍니다.
           if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
-            printf '%s' "$PAYLOAD" > card.raw.json
-            SLUG=$(python3 -c "import json;print(json.load(open('card.raw.json')).get('slug','?'))" 2>/dev/null)
-            if [ -z "$SLUG" ] || [ "$SLUG" = "?" ]; then
-              echo "::error::받은 데이터에 slug가 없습니다. GPT가 보낸 내용을 확인하세요."
+            printf '%s' "$PAYLOAD" > payload.json
+            SLUG=$(python3 - <<'PY' 2>/dev/null
+          import json
+          d = json.load(open("payload.json", encoding="utf-8"))
+          card = d["card"] if isinstance(d.get("card"), dict) else d
+          json.dump(card, open("card.raw.json", "w", encoding="utf-8"), ensure_ascii=False)
+          print(card.get("slug", ""))
+          PY
+          )
+            if [ -z "$SLUG" ]; then
+              echo "::error::받은 데이터에 slug가 없습니다. client_payload를 {\"card\": {…카드 JSON…}} 모양으로 보냈는지 확인하세요."
               exit 1
             fi
-            echo "::notice::GPT가 보낸 카드 JSON으로 만듭니다 ($SLUG)."
+            echo "::notice::앱이 보낸 카드 JSON으로 만듭니다 ($SLUG)."
             exit 0
           fi
           # ② 샘플 시험 주행
