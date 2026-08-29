@@ -2,6 +2,9 @@ name: 카드뉴스 생성
 
 # 매일 오전 8시(KST) — 블로그가 아침에 발행된 뒤 도는 시각으로 맞추세요.
 on:
+  # GPT가 카드 JSON을 직접 보내면 즉시 실행됩니다 (블로그를 읽지 않음)
+  repository_dispatch:
+    types: [cardnews]
   schedule:
     - cron: "0 23 * * *"   # UTC 23:00 = KST 08:00
   workflow_dispatch:
@@ -29,19 +32,39 @@ jobs:
 
       - name: 의존성 설치
         run: |
+          set -e
+          # apt 목록을 먼저 갱신하지 않으면 --with-deps 가 패키지를 못 찾는 경우가 있다
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk
+          fc-list | grep -i "CJK KR" | head -3
           pip install playwright
           playwright install --with-deps chromium
-          sudo apt-get install -y fonts-noto-cjk
+          python3 -c "import playwright; print('playwright ok')"
 
       - name: 1~2단계 · 글 수집
         id: fetch
+        env:
+          PAYLOAD: ${{ toJSON(github.event.client_payload) }}
         run: |
           set +e
+          # ① GPT가 직접 보낸 카드 JSON — 블로그를 읽지 않습니다
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            printf '%s' "$PAYLOAD" > card.raw.json
+            SLUG=$(python3 -c "import json;print(json.load(open('card.raw.json')).get('slug','?'))" 2>/dev/null)
+            if [ -z "$SLUG" ] || [ "$SLUG" = "?" ]; then
+              echo "::error::받은 데이터에 slug가 없습니다. GPT가 보낸 내용을 확인하세요."
+              exit 1
+            fi
+            echo "::notice::GPT가 보낸 카드 JSON으로 만듭니다 ($SLUG)."
+            exit 0
+          fi
+          # ② 샘플 시험 주행
           if [ "${{ inputs.use_sample }}" = "true" ]; then
             cp samples/demo-card.json card.raw.json
             echo "::notice::샘플 데이터로 시험 주행합니다. 블로그는 읽지 않습니다."
             exit 0
           fi
+          # ③ 블로그에서 읽기 (방화벽이 열려 있을 때만 성공)
           python3 scripts/fetch_post.py \
             ${{ inputs.slug && format('--slug {0}', inputs.slug) || '' }} \
             --out card.raw.json
