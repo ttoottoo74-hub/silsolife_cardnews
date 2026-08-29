@@ -16,6 +16,7 @@
 """
 
 import argparse
+import glob
 import json
 import os
 import sys
@@ -62,12 +63,21 @@ def main():
         print("CARD_BASE_URL / IG_USER_ID / IG_ACCESS_TOKEN이 필요합니다.", file=sys.stderr)
         sys.exit(1)
 
-    n_cards = len(card["cards"]) + 4  # 표지 + 답 + 본문 + 주의 + 출처
+    # 실제로 만들어진 PNG를 센다.
+    # 도식(visual) 카드가 있으면 한 장이 더 늘기 때문에, 계산으로 맞추면 마지막 장을 빠뜨린다.
+    folder = os.path.dirname(os.path.abspath(args.card))
+    pngs = sorted(glob.glob(os.path.join(folder, "[0-9][0-9].png")))
+
+    if not pngs:
+        print(f"카드 이미지를 찾지 못했습니다: {folder}", file=sys.stderr)
+        sys.exit(1)
+
+    n_cards = len(pngs)
     if n_cards > MAX_CAROUSEL:
         print(f"카드가 {n_cards}장입니다 — 캐러셀 상한 {MAX_CAROUSEL}장을 넘습니다.", file=sys.stderr)
         sys.exit(1)
 
-    urls = [f"{base}/cards/{slug}/{i:02d}.png" for i in range(1, n_cards + 1)]
+    urls = [f"{base}/cards/{slug}/{os.path.basename(p)}" for p in pngs]
 
     caption = caption_with_tags(card)
     if len(caption) > 2200:
