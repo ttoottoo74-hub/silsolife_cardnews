@@ -9,6 +9,9 @@ on:
     - cron: "0 23 * * *"   # UTC 23:00 = KST 08:00
   workflow_dispatch:
     inputs:
+      card_json:
+        description: "카드 JSON 통째로 붙여넣기 (앱 연동 전에는 이 칸만 쓰면 됩니다)"
+        required: false
       slug:
         description: "특정 글의 slug (비우면 최신 글)"
         required: false
@@ -35,7 +38,7 @@ jobs:
           set -e
           # apt 목록을 먼저 갱신하지 않으면 --with-deps 가 패키지를 못 찾는 경우가 있다
           sudo apt-get update
-          sudo apt-get install -y fonts-noto-cjk
+          sudo apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra
           fc-list | grep -i "CJK KR" | head -3
           pip install playwright
           playwright install --with-deps chromium
@@ -45,8 +48,20 @@ jobs:
         id: fetch
         env:
           PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+          CARD_JSON: ${{ inputs.card_json }}
         run: |
           set +e
+          # ⓪ 손으로 붙여넣은 카드 JSON — 앱 연동 전에도 오늘 바로 쓸 수 있는 길
+          if [ -n "$CARD_JSON" ]; then
+            printf '%s' "$CARD_JSON" > card.raw.json
+            SLUG=$(python3 -c "import json;print(json.load(open('card.raw.json')).get('slug','?'))" 2>/dev/null)
+            if [ -z "$SLUG" ] || [ "$SLUG" = "?" ]; then
+              echo "::error::붙여넣은 내용이 JSON이 아니거나 slug가 없습니다. 여는 중괄호부터 닫는 중괄호까지 통째로 넣었는지 확인하세요."
+              exit 1
+            fi
+            echo "::notice::붙여넣은 카드 JSON으로 만듭니다 ($SLUG)."
+            exit 0
+          fi
           # ① GPT가 직접 보낸 카드 JSON — 블로그를 읽지 않습니다
           if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
             printf '%s' "$PAYLOAD" > card.raw.json
@@ -90,7 +105,8 @@ jobs:
           SLUG=$(python3 -c "import json;print(json.load(open('card.json'))['slug'])")
           echo "SLUG=$SLUG" >> $GITHUB_ENV
           mkdir -p docs/cards/$SLUG
-          python3 scripts/render_cards.py card.json docs/cards/$SLUG
+          CARD_FONT="${{ vars.CARD_FONT || 'serif' }}" \
+            python3 scripts/render_cards.py card.json docs/cards/$SLUG
           # 발행 스크립트가 기대하는 01.png ~ NN.png 이름으로 정리
           cd docs/cards/$SLUG
           i=1
