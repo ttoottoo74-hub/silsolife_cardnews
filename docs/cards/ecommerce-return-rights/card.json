@@ -1,0 +1,56 @@
+{
+  "answer": "증빙을 남기고 반품비 부담 문자를 받아두면 환급 지연과 비용 분쟁을 줄일 수 있습니다.",
+  "caption": "온라인 구매는 원칙적으로 7일 이내 반품 가능합니다.\n\n표시·광고와 다른 경우에는 더 긴 기한(3개월 또는 인지 후 30일)을 활용하세요. 반품비 부담과 환급 지연에 대비해 증빙을 꼭 남기세요.\n\n자세한 내용은 프로필 링크에서 확인하실 수 있습니다.",
+  "cards": [
+    {
+      "body": "원칙적으로 재화를 받은 날부터 7일 이내에 청약철회가 가능합니다.",
+      "heading": "기본 권리",
+      "highlight": "7일"
+    },
+    {
+      "body": "상품이 표시·광고와 다르면 수령일부터 3개월 이내 또는 안 날부터 30일 이내에 반품할 수 있습니다.",
+      "heading": "표시·광고 위반",
+      "highlight": "3개월"
+    },
+    {
+      "body": "사업자는 재화를 반환받은 날부터 3영업일 이내에 이미 받은 대금을 환급해야 합니다.",
+      "heading": "환급 기한",
+      "highlight": "3영업일"
+    },
+    {
+      "body": "단순 변심은 소비자가 반품비를 부담하지만, 표시·광고와 다른 경우 반환비용은 사업자가 부담합니다.",
+      "heading": "반품비 책임",
+      "highlight": null
+    }
+  ],
+  "category": "생활",
+  "category_id": 6,
+  "caution": "사업자 약관과 거래내역에 따라 적용이 달라질 수 있으니 증빙을 확인하세요.",
+  "hashtags": [
+    "청약철회",
+    "전자상거래",
+    "반품비",
+    "환급지연",
+    "증빙보관",
+    "디지털콘텐츠",
+    "소비자권리",
+    "생활법령"
+  ],
+  "hook": "7일 원칙, 표시광고는 3개월",
+  "published_at": "2026-08-30T11:48:33.841+09:00",
+  "slug": "ecommerce-return-rights",
+  "sources": [
+    {
+      "name": "생활법령",
+      "url": "https://www.easylaw.go.kr/CSP/CnpClsMainBtr.laf?ccfNo=1&cciNo=1&cnpClsNo=1&csmSeq=669&popMenu=ov"
+    },
+    {
+      "name": "국가법령",
+      "url": "https://www.law.go.kr/lsInfoP.do?chrClsCd=010102&lsId=009318&lsiSeq=182153&viewCls=lsRvsDocInfoR"
+    }
+  ],
+  "title": "반품·환급, 언제 어떻게 요구해야 할까요?",
+  "topic_label": "반품권리",
+  "verified_on": "2026-08-30",
+  "version": "1.1"
+}
