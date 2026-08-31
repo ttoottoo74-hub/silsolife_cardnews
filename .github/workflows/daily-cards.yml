@@ -127,6 +127,18 @@ jobs:
           done
           rm -f _cards.html
           cd -
+          # 네이버 클립 등 세로 지면용 9:16 한 벌을 더 뽑아 clip/ 아래 둔다
+          mkdir -p docs/cards/$SLUG/clip
+          CARD_SIZE=9x16 CARD_FONT="${{ vars.CARD_FONT || 'serif' }}" \
+            python3 scripts/render_cards.py card.json docs/cards/$SLUG/clip
+          cd docs/cards/$SLUG/clip
+          i=1
+          for f in ${SLUG}_*.png; do
+            mv "$f" "$(printf '%02d' $i).png"
+            i=$((i+1))
+          done
+          rm -f _cards.html
+          cd -
           cp card.json docs/cards/$SLUG/card.json
 
       - name: 5단계 · 검수 페이지 생성
