@@ -1,0 +1,60 @@
+{
+  "answer": "갱신 의사 증거를 남기고 신고·전세금보증으로 안전장치를 마련하세요.",
+  "caption": "갱신 의사 증거를 남기고 신고·전세금보증으로 안전장치를 마련하세요.\n\n갱신요구권으로 통상 2년 뒤 추가 2년을 요구해 거주 안정성을 높일 수 있습니다. 갱신 시 임대료 인상은 종전 임대료의 5% 이내로 제한됩니다.\n\n자세한 내용은 프로필 링크에서 확인하실 수 있습니다.",
+  "cards": [
+    {
+      "body": "갱신요구권으로 통상 2년 뒤 추가 2년을 요구해 거주 안정성을 높일 수 있습니다.",
+      "heading": "거주 기간 보장",
+      "highlight": "2년"
+    },
+    {
+      "body": "갱신 시 임대료 인상은 종전 임대료의 5% 이내로 제한됩니다.",
+      "heading": "임대료 상한",
+      "highlight": "5%"
+    },
+    {
+      "body": "계약 체결 또는 갱신 후 30일 이내에 반드시 임대차신고를 해야 합니다.",
+      "heading": "신고 기한",
+      "highlight": "30일"
+    },
+    {
+      "body": "전세 계약자는 HUG 등의 전세금반환보증 가입 가능 여부를 확인해 보증으로 위험을 낮추세요.",
+      "heading": "전세금 보호",
+      "highlight": "HUG"
+    }
+  ],
+  "category": "가족·노후",
+  "category_id": 7,
+  "caution": "법 적용 대상과 예외가 있으니 보증금·월차임 기준과 소재지 등 법적 요건을 확인하세요.",
+  "hashtags": [
+    "전월세상한제",
+    "계약갱신청구권",
+    "임대차신고제",
+    "전세보증",
+    "임차인권리",
+    "HUG",
+    "임대료인상",
+    "갱신요구"
+  ],
+  "hook": "임대료 5% 상한 확인",
+  "published_at": "2026-09-01T08:12:17.847+09:00",
+  "slug": "renewal-limit-5pct",
+  "sources": [
+    {
+      "name": "법령",
+      "url": "https://www.law.go.kr/LSW/lsInfoP.do?ancYnChk=0&chrClsCd=010202&efYd=20230418&joNo=001100&lsiSeq=249999&urlMode=lsInfoP"
+    },
+    {
+      "name": "국토교통부",
+      "url": "https://www.molit.go.kr/portal/common/download/DownloadMltm2.jsp?FileName=%E2%98%852024%EB%85%84+%EC%A3%BC%ED%83%9D%EC%97%85%EB%AC%B4%ED%8E%B8%EB%9E%8C%28%EC%B5%9C%EC%A2%85%29_.pdf&FilePath=portal%2FDextUpload%2F202504%2F20250415_105328_751.pdf"
+    },
+    {
+      "name": "국토교통부",
+      "url": "https://www.molit.go.kr/portal/common/download/DownloadMltm2.jsp?FileName=%E2%98%852024%EB%85%84+%EC%A3%BC%EA%B1%B0%EA%B8%89%EC%97%AC+%EC%82%AC%EC%97%85%EC%95%88%EB%82%B4.pdf&FilePath=%2Fupload%2Fportal%2FDextUpload%2F202401%2F20240112_092651_242.pdf"
+    }
+  ],
+  "title": "계약갱신·임대료 상한(5%) 제대로 활용하려면",
+  "topic_label": "전월세권리",
+  "verified_on": "2026-08-31",
+  "version": "1.1"
+}
