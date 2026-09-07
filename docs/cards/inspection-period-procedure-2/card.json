@@ -1,0 +1,56 @@
+{
+  "answer": "유효기간을 시스템에서 확인해 유효기간 만료 전후 31일 이내에 예약하고 책임보험 증명을 제출하면 됩니다.",
+  "caption": "종합검사는 유효기간 만료 전후 각 31일 이내에 받으세요.\n\n자동차등록증이나 자동차365에서 유효기간을 확인한 뒤, 검사 예약과 책임보험 가입증명 제출을 준비하세요.\n\n자세한 내용은 프로필 링크에서 확인하실 수 있습니다.",
+  "cards": [
+    {
+      "body": "검사 가능 기간은 유효기간 만료 전후 각각 31일입니다. 이 기간 안에 예약하세요.",
+      "heading": "검사 가능 기간",
+      "highlight": "31일"
+    },
+    {
+      "body": "소유권이나 사용본거지 변경으로 대상이 된 경우 변경등록일로부터 62일 이내에 검사를 받아야 합니다.",
+      "heading": "변경등록 시 기한",
+      "highlight": "62일"
+    },
+    {
+      "body": "검사 신청 시 자동차손해배상보장법상 책임보험 가입증명서를 제출해야 합니다.",
+      "heading": "제출서류",
+      "highlight": null
+    },
+    {
+      "body": "검사 지연 시 지자체에서 과태료를 부과합니다. 안내에는 자가용 최고 약 90만원, 사업용 최고 약 230만원 수준이 표기되어 있습니다.",
+      "heading": "미검사 불이익",
+      "highlight": "자가용 최고 약 90만"
+    }
+  ],
+  "category": "생활",
+  "category_id": 6,
+  "caution": "시행 규정이나 지방청 고지는 변동될 수 있으니 검사유효기간과 지자체 안내를 반드시 확인하세요.",
+  "hashtags": [
+    "종합검사유효기간",
+    "차량검사",
+    "책임보험",
+    "검사예약",
+    "검사지연주의",
+    "변경등록",
+    "자동차관리",
+    "지방청안내"
+  ],
+  "hook": "31일 확인",
+  "published_at": "2026-09-08T07:49:11.810+09:00",
+  "slug": "inspection-period-procedure-2",
+  "sources": [
+    {
+      "name": "CLIK",
+      "url": "https://clik.nanet.go.kr/clikr-collection/policyinfo/228/1076/2024/CLIKC20954431771308_attach_1.pdf"
+    },
+    {
+      "name": "생활법령",
+      "url": "https://www.easylaw.go.kr/CSP/CnpClsMain.laf?ccfNo=2&cciNo=2&cnpClsNo=2&csmSeq=675&menuType=cnpcls&popMenu=ov"
+    }
+  ],
+  "title": "종합검사 유효기간과 빠른 처리법",
+  "topic_label": "검사유효기간",
+  "verified_on": "2026-09-07",
+  "version": "1.1"
+}
