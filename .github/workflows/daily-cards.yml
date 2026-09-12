@@ -1,12 +1,10 @@
 name: 카드뉴스 생성
 
-# 매일 오전 8시(KST) — 블로그가 아침에 발행된 뒤 도는 시각으로 맞추세요.
+# 자동 실행은 콘텐츠랩의 repository_dispatch 한 경로만 사용합니다.
+# workflow_dispatch는 수동 복구/시험용으로만 남깁니다.
 on:
-  # GPT가 카드 JSON을 직접 보내면 즉시 실행됩니다 (블로그를 읽지 않음)
   repository_dispatch:
     types: [cardnews]
-  schedule:
-    - cron: "0 23 * * *"   # UTC 23:00 = KST 08:00
   workflow_dispatch:
     inputs:
       card_json:
@@ -90,7 +88,7 @@ jobs:
             echo "::notice::샘플 데이터로 시험 주행합니다. 블로그는 읽지 않습니다."
             exit 0
           fi
-          # ③ 블로그에서 읽기 (방화벽이 열려 있을 때만 성공)
+          # ③ 수동 실행 시 블로그에서 읽기
           python3 scripts/fetch_post.py \
             ${{ inputs.slug && format('--slug {0}', inputs.slug) || '' }} \
             --out card.raw.json
