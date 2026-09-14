@@ -1,0 +1,50 @@
+name: Publish YouTube Short
+
+on:
+  repository_dispatch:
+    types: [publish-youtube-short]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: youtube-short-${{ github.event.client_payload.master_id }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: youtube
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Write dispatch payload
+        env:
+          PAYLOAD_JSON: ${{ toJson(github.event.client_payload) }}
+        run: |
+          printf '%s' "$PAYLOAD_JSON" > /tmp/shortform-payload.json
+
+      - name: Publish YouTube Short
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YOUTUBE_PRIVACY_STATUS: ${{ vars.YOUTUBE_PRIVACY_STATUS || 'public' }}
+          YOUTUBE_CATEGORY_ID: ${{ vars.YOUTUBE_CATEGORY_ID || '22' }}
+        run: |
+          python3 scripts/publish_youtube_short.py --payload /tmp/shortform-payload.json > /tmp/publish-result.json
+
+      - name: Write idempotency marker
+        env:
+          MASTER_ID: ${{ github.event.client_payload.master_id }}
+        run: |
+          mkdir -p ".shortform-published/youtube"
+          cp /tmp/publish-result.json ".shortform-published/youtube/${MASTER_ID}.json"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ".shortform-published/youtube/${MASTER_ID}.json"
+          git commit -m "Mark YouTube Short ${MASTER_ID} published" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
