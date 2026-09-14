@@ -16,11 +16,18 @@ on:
         type: boolean
         default: true
 
+# 같은 slug의 자동 발행은 반드시 직렬화합니다. 첫 실행이 성공해 marker를
+# 커밋한 뒤 두 번째 실행이 시작되므로 네트워크 재시도로 인한 중복 게시를 막습니다.
+concurrency:
+  group: instagram-${{ github.event.client_payload.slug || inputs.slug }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
 jobs:
   publish:
     runs-on: ubuntu-latest
-    # 승인 게이트를 한 겹 더 두고 싶으면 리포지터리 설정에서
-    # 'instagram' 환경에 필수 리뷰어를 지정하세요.
     environment: instagram
     steps:
       - uses: actions/checkout@v4
@@ -40,12 +47,10 @@ jobs:
           set -e
           if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
             SLUG="$P_SLUG"
-            # 앱이 부를 때는 텔레그램에서 이미 승인을 받았으므로 실제 발행이 기본이다
             DRY="$P_DRY"; [ "$DRY" = "true" ] || DRY=false
           else
             SLUG="$I_SLUG"; DRY="$I_DRY"
           fi
-          # slug를 셸에 그대로 넘기기 전에 형태를 검사한다
           case "$SLUG" in
             ''|*[!a-zA-Z0-9-]*)
               echo "::error::slug가 비었거나 형식이 올바르지 않습니다. 영문·숫자·붙임표만 쓸 수 있습니다."
@@ -55,14 +60,23 @@ jobs:
           printf 'dry=%s\n'  "$DRY"  >> "$GITHUB_OUTPUT"
           echo "::notice::$SLUG 발행 (모의 실행=$DRY)"
 
-      - name: 카드 확인
+      - name: 카드 및 중복 발행 확인
+        id: guard
         run: |
+          set -e
           SLUG='${{ steps.v.outputs.slug }}'
           test -f "docs/cards/$SLUG/card.json" \
             || { echo "::error::docs/cards/$SLUG 가 없습니다. 카드뉴스 생성이 끝났는지 확인하세요."; exit 1; }
+          if [ "${{ github.event_name }}" = "repository_dispatch" ] && [ -f "docs/cards/$SLUG/.instagram-published" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$SLUG 는 이미 자동 발행 완료된 콘텐츠입니다. 중복 발행을 건너뜁니다."
+            exit 0
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
           ls "docs/cards/$SLUG"/*.png
 
       - name: 발행
+        if: steps.guard.outputs.skip != 'true'
         env:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
@@ -72,3 +86,15 @@ jobs:
           python3 scripts/publish_instagram.py \
             "docs/cards/$SLUG/card.json" \
             ${{ steps.v.outputs.dry == 'true' && '--dry-run' || '' }}
+
+      - name: 자동 발행 완료 marker 기록
+        if: github.event_name == 'repository_dispatch' && steps.guard.outputs.skip != 'true' && steps.v.outputs.dry != 'true'
+        run: |
+          set -e
+          SLUG='${{ steps.v.outputs.slug }}'
+          printf 'published_at=%s\nrun_id=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${{ github.run_id }}" > "docs/cards/$SLUG/.instagram-published"
+          git config user.name "silso-bot"
+          git config user.email "bot@silsolife.kr"
+          git add "docs/cards/$SLUG/.instagram-published"
+          git commit -m "인스타그램 발행 완료: $SLUG"
+          git push
