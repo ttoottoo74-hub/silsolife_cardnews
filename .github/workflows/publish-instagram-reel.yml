@@ -1,0 +1,48 @@
+name: Publish Instagram Reel
+
+on:
+  repository_dispatch:
+    types: [publish-instagram-reel]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: instagram-reel-${{ github.event.client_payload.master_id }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: instagram
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Write dispatch payload
+        env:
+          PAYLOAD_JSON: ${{ toJson(github.event.client_payload) }}
+        run: |
+          printf '%s' "$PAYLOAD_JSON" > /tmp/shortform-payload.json
+
+      - name: Publish Reel
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          GRAPH_VERSION: ${{ vars.GRAPH_VERSION || 'v26.0' }}
+        run: |
+          python3 scripts/publish_instagram_reel.py --payload /tmp/shortform-payload.json > /tmp/publish-result.json
+
+      - name: Write idempotency marker
+        env:
+          MASTER_ID: ${{ github.event.client_payload.master_id }}
+        run: |
+          mkdir -p ".shortform-published/instagram"
+          cp /tmp/publish-result.json ".shortform-published/instagram/${MASTER_ID}.json"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ".shortform-published/instagram/${MASTER_ID}.json"
+          git commit -m "Mark Instagram Reel ${MASTER_ID} published" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
