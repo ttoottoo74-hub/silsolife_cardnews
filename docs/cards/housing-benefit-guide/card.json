@@ -1,0 +1,70 @@
+{
+  "answer": "가구의 소득인정액과 지역별 기준임대료를 비교해 실제 지원액을 확인해 보세요.",
+  "caption": "가구의 소득인정액과 지역별 기준임대료를 비교해 실제 지원액을 확인해 보세요.\n\n신청 자격은 가구의 소득인정액이 기준중위소득 48% 이하인 경우입니다. 1인 가구 소득인정액 기준은 월 123만834원입니다.\n\n자세한 내용은 프로필 링크에서 확인하실 수 있습니다.",
+  "cards": [
+    {
+      "body": "신청 자격은 가구의 소득인정액이 기준중위소득 48% 이하인 경우입니다.",
+      "heading": "누가 받을 수 있나",
+      "highlight": "48%"
+    },
+    {
+      "body": "1인 가구 소득인정액 기준은 월 123만834원입니다.",
+      "heading": "1인 가구 기준",
+      "highlight": "123만834원"
+    },
+    {
+      "body": "지역별 기준임대료 예: 1인 서울 월 36만9,000원으로 지원 상한이 정해져 있습니다.",
+      "heading": "기준임대료 예시",
+      "highlight": "36만9,000원"
+    },
+    {
+      "body": "생계급여 기준을 초과하면 초과분의 30%를 자기부담으로 차감합니다.",
+      "heading": "자기부담은?",
+      "highlight": "30%"
+    },
+    {
+      "body": "임대차계약서가 없거나 실제임차료가 0원이면 임차급여를 받을 수 없습니다.",
+      "heading": "계약서 유무 중요",
+      "highlight": "0원"
+    },
+    {
+      "body": "실제임차료가 기준임대료의 5배를 넘으면 최저 지급액 월 1만원만 지급됩니다.",
+      "heading": "과다 임차료 제한",
+      "highlight": "5배"
+    }
+  ],
+  "category": "정부·제도",
+  "category_id": 4,
+  "caution": "제도 기준은 2026년 기준이며, 실제 지급액은 소득·재산·계약에 따라 달라집니다.",
+  "hashtags": [
+    "주거급여",
+    "임차급여",
+    "월세지원",
+    "기준임대료",
+    "소득인정액",
+    "복지알림",
+    "LH",
+    "2026제도"
+  ],
+  "hook": "48% 기준 확인",
+  "published_at": "2026-09-15T07:56:44.837+09:00",
+  "slug": "housing-benefit-guide",
+  "sources": [
+    {
+      "name": "마이홈포털",
+      "url": "https://www.myhome.go.kr/hws/portal/cont/selectHousingBenefitView.do"
+    },
+    {
+      "name": "마이홈포털",
+      "url": "https://m.myhome.go.kr/hws/portal/cont/selectHousingBenefitView.do"
+    },
+    {
+      "name": "마이홈포털",
+      "url": "https://m.myhome.go.kr/hws/portal/cont/selectRentalHouseholdSupView.do"
+    }
+  ],
+  "title": "2026년 주거급여 한눈에 보기",
+  "topic_label": "주거급여",
+  "verified_on": "2026-09-14",
+  "version": "1.1"
+}
